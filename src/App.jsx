@@ -1,14 +1,16 @@
 import { Form } from "react-bootstrap";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import axios from "axios";
 import "./App.css";
 
-const API_URL = 'https://api.unsplash.com/search/photos';
+const API_URL = "https://api.unsplash.com/search/photos";
 const IMAGES_PER_PAGE = 20;
-
 
 const App = () => {
   const searchInput = useRef(null);
+  const [images, setImages] = useState([]);
+  const [totalPages, setTotalPages] = useState(0);
+
   const fetchImages = async () => {
     try {
       const { data } = await axios.get(
@@ -18,18 +20,22 @@ const App = () => {
           import.meta.env.VITE_API_KEY
         }`
       );
-      console.log('data', data);
+      console.log("data", data);
+      setImages(data.results);
+      setTotalPages(data.total_pages);
     } catch (error) {
       console.log(error);
     }
   };
-  
+
   const handleSearch = (event) => {
     event.preventDefault();
     console.log(searchInput.current.value);
+    fetchImages();
   };
   const handleSelection = (selection) => {
     searchInput.current.value = selection;
+    fetchImages();
   };
 
   return (
@@ -50,6 +56,16 @@ const App = () => {
         <div onClick={() => handleSelection("birds")}>Birds</div>
         <div onClick={() => handleSelection("cats")}>Cats</div>
         <div onClick={() => handleSelection("shoes")}>Shoes</div>
+      </div>
+      <div className="images">
+        {images.map((image) => (
+          <img
+            key={image.id}
+            src={image.urls.small}
+            alt={image.alt_description}
+            className="image"
+          />
+        ))}
       </div>
     </div>
   );
